@@ -1,6 +1,6 @@
 # 2616B-Robotics-2023-24
 
-_Claw Bot Assembly__
+_Claw Bot Assembly_
 
 1. Drive train ✅
 2. Claw Mechanism ❌

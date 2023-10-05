@@ -1,2 +1,8 @@
 # 2616B-Robotics-2023-24
-2616B robotics team
+
+_Claw Bot Assembly__
+```
+1. ~~Drive train~~ ✅
+2. Claw Mechanism ❌
+3. AI/ML Claw Position Code??
+```

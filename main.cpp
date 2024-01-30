@@ -5,15 +5,19 @@
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
+
+
 #include "vex.h"
 
+using namespace vex;
+
 // Brain should be defined by default
-vex::brain Brain;
+brain Brain;
+
 
 // START V5 MACROS
 #define waitUntil(condition)                                                   \
-  do
-  {                                                                            \
+  do {                                                                         \
     wait(5, msec);                                                             \
   } while (!(condition))
 
@@ -21,12 +25,15 @@ vex::brain Brain;
   for (int iterator = 0; iterator < iterations; iterator++)
 // END V5 MACROS
 
+
 // Robot configuration code.
+
+
+
 
 // Helper to make playing sounds from the V5 in VEXcode easier and
 // keeps the code cleaner by making it clear what is happening.
-void playVexcodeSound(const char *soundName)
-{
+void playVexcodeSound(const char *soundName) {
   printf("VEXPlaySound:%s\n", soundName);
   wait(5, msec);
 }
@@ -36,8 +43,8 @@ void playVexcodeSound(const char *soundName)
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
-/*    Author:       {Rohan Bharatia + Namish Bansal}                          */
-/*    Created:      {1/30/2024}                                               */
+/*    Author:       {author}                                                  */
+/*    Created:      {date}                                                    */
 /*    Description:  V5 project                                                */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
@@ -45,68 +52,72 @@ void playVexcodeSound(const char *soundName)
 // Include the V5 Library
 #include "vex.h"
 
-// Define drive train names
+// Allows for easier use of the VEX Library
+using namespace vex;
+
+// define motor types
 #define FRONT_MOTOR 0
 #define BACK_MOTOR 1
 
 // Controller
-vex::controller Controller(vex::primary);
+controller Controler(primary);
 
-// Drive train ports
-vex::motor left_drive_train[2] = [vex::motor front_left(PORT1, true), vex::motor back_left(PORT2, true)];
-vex::motor right_drive_train[2] = [vex::motor front_right(PORT3), vex::motor back_right(PORT4)];
+// Drive train
+motor left_drive_train[2] = [motor front_left(PORT2), motor back_left(PORT1)]; //left drive
+motor right_drive_train[2] = [motor right_left(PORT2), motor right_left(PORT1)]; //right drive
 
-// Scoring ports
-vex::motor intake(PORT5);
-vex::motor flywheel(PORT6);
+// Scoring
+motor intake(PORT5);
+motor flywheel(PORT6);
 
-// Pneumatics ports
-vex::digital_out pneumatics = vex::digital_out(vex::Brain.ThreeWirePort.A);
-
-// Competition
-competition Competition;
+// Pneumatics
+digital_out pneumatics = digital_out(Brain.ThreeWirePort.A);
 
 void pre_auton(void)
 {
-  vex::Brain.Screen.clearScreen();
-  vex::wait(1, vex::seconds);
+  Brain.Screen.clearScreen();
+  wait(1, seconds);
 }
-
 void auton(void)
 {
-  vex::Brain.Screen.clearScreen();
-
-  // auton code
+  Brain.Screen.clearScreen();
 }
 
-void control(void)
+void user_controls(void)
 {
-  vex::Brain.Screen.clearScreen();
+  Brain.Screen.clearScreen();
 
   while(true)
   {
-    vex::wait(20, vex::msec);
+    wait(20, msec);
   }
 }
 
-int main()
+// Prints inspirational messages
+void print_msg()
 {
-  vex::Brain.Screen.clearScreen();
+  Brain.Screen.setCursor(5,4);
+  Brain.Screen.setPenColor(red);
+  Brain.Screen.print("Line ∞: Syntax error");
+  Brain.Screen.setCursor(6, 5);
+  Brain.Screen.setPenColor(green);
+  Brain.Screen.print("Powered by Blåhaj.lib  :)");
+  Controller.Screen.setPenColor(black);
+  Controller.Screen.print("Lock in Fred :)");
+}
 
-  vex::Brain.Screen.setCursor(5,4);
-  vex::Brain.Screen.setPenColor(vex::red);
-  vex::Brain.Screen.print("Line ∞: Syntax error");
-  vex::Brain.Screen.setCursor(6, 5);
-  vex::Brain.Screen.setPenColor(vex::green);
-  vex::Brain.Screen.print("Powered by Blåhaj.lib  :)");
-  Controller.Screen.setPenColor(vex::cyan);
-  Controller.Screen.print("Lock in Fred");
+int main() {
+  Brain.Screen.clearScreen();
+
+  competition Competition;
 
   Competition.autonomous(auton);
-  Competition.drivercontrol(controls);
+  Competition.drivercontrol(user_controls);
+
+  pre_auton();
 
   while(true)
   {
-    vex::wait(100, vex::msec);
+    wait(100, seconds);
   }
 }

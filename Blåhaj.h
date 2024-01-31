@@ -1,6 +1,3 @@
-/*
-~~~ DO NOT touch anything from '#pragma region VEXcode Generated Robot Configuration' to '#pragma endregion VEXcode Generated Robot Configuration' ~~~
-*/
 #pragma region VEXcode Generated Robot Configuration
 // Make sure all required headers are included.
 #include <stdio.h>
@@ -31,8 +28,57 @@ brain Brain;
 
 // Robot configuration code.
 
+// Lines 33-81 were written by me in #pragma
 
+// Controller
+controller Controller1(primary);
+// controller Controller2(partner); // Only use a partner controller if you NEED it (not likely)
 
+// Competition
+competition Competition;
+
+// Bot parts
+// Drive train
+motor left_drive_train[3] =  { motor(PORT2, true),                                                                       \
+                               0 /* put 0 if there is no middle drive motor or motor(PORT#, true) if there is */,\
+                               motor(PORT1, true) };
+motor right_drive_train[3] = { motor(PORT4, false),                                                                      \
+                               0 /* put 0 if there is no middle drive motor or motor(PORT#, false) if there is */,\
+                               motor(PORT3, false) };
+// Putting true after the port reverses the motor
+// Pneumatics
+digital_out solenoid[8] = { digital_out(Brain.ThreeWirePort.A), digital_out(Brain.ThreeWirePort.B),       \
+                            digital_out(Brain.ThreeWirePort.C), digital_out(Brain.ThreeWirePort.D),       \
+                            digital_out(Brain.ThreeWirePort.E), digital_out(Brain.ThreeWirePort.F),         \
+                            digital_out(Brain.ThreeWirePort.G), digital_out(Brain.ThreeWirePort.H) };
+
+// Autons
+// Tracking wheels
+rotation tracking_wheel[2] = { rotation(PORT11, false), rotation(PORT12, false) };
+// IMU
+inertial IMU(PORT13);
+
+// Scoring
+motor intake_motor(PORT5, false);
+
+// Match loading
+//motor catapult_motor(PORT6, false); // Uncomment if you have a catapult
+motor flywheel_motor(PORT6, false); // Uncomment if you have a flywheel
+//motor puncher_motor(PORT6, false); // Uncomment if you have a puncher / slapper
+
+// Controller inputs
+// Joysticks
+int32_t left_joystick[2] = { Controller1.Axis4.position(), Controller1.Axis3.position() };
+int32_t right_joystick[2] = { Controller1.Axis1.position(), Controller1.Axis2.position() };
+// Back buttons
+bool left_trigger[2] = { Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing() };
+bool right_trigger[2] = { Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing() };
+// Arrow buttons
+bool arrow[4] = { Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(),            \
+                  Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing() };
+// action buttons
+bool action[4] = { Controller1.ButtonX.pressing(), Controller1.ButtonY.pressing(),         \
+                   Controller1.ButtonA.pressing(), Controller1.ButtonB.pressing() };
 
 // Helper to make playing sounds from the V5 in VEXcode easier and
 // keeps the code cleaner by making it clear what is happening.
@@ -43,7 +89,6 @@ void playVexcodeSound(const char *soundName) {
 
 #pragma endregion VEXcode Generated Robot Configuration
 
-// ~~~ All code below this line (46+) was written by me ~~~
 /*
 +--------------------------------------------------------------------------+
 |                                                                          |
@@ -61,7 +106,7 @@ void playVexcodeSound(const char *soundName) {
 // Allows for easier use of the VEX Library
 using namespace vex;
 
-using namespace std;
+#define PI atan(1) * 4
 
 // Define (preset) controller layout
 #define X 0 // Used for: left_joystick + right_joystick + action_button
@@ -99,60 +144,165 @@ using namespace std;
 // Define if you have an auton
 #define AUTON false
 
-// Controller
-controller Controller1(primary);
-// controller Controller2(partner); // Only use a partner controller if you NEED it (not likely)
+// Auton functions
+// Move forward in inches
+void drive_forward(int dist = 12)
+{
+  const int speed = 1600;
+  const int circumfrance = 5; // Circumfrance in inches
 
-// Competition
-competition Competition;
+  float target_position = dist * 360 / (2 * PI * circumfrance);
 
-// Bot parts
-// Drive train
-motor left_drive_train[3] = {motor(PORT2, true),                                                                                                \
-                             0 /* put 0 if there is no middle drive motor or motor(PORT#, true) if there is */, motor(PORT1, true)};
-motor right_drive_train[3] = {motor(PORT4),                                                                                          \
-                              0 /* put 0 if there is no middle drive motor or motor(PORT#) if there is */, motor(PORT3)};
-// Putting true after the port reverses the motor
-// Pneumatics
-digital_out solenoid[8] = {digital_out(Brain.ThreeWirePort.A), digital_out(Brain.ThreeWirePort.B),       \
-                           digital_out(Brain.ThreeWirePort.C), digital_out(Brain.ThreeWirePort.D),       \
-                           digital_out(Brain.ThreeWirePort.E), digital_out(Brain.ThreeWirePort.F),       \
-                           digital_out(Brain.ThreeWirePort.G), digital_out(Brain.ThreeWirePort.H)};
+  left_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // left_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  left_drive_train[BACK_MOTOR].setPosition(0, degrees);
+  right_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // right_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  right_drive_train[BACK_MOTOR].setPosition(0, degrees);
 
-// Autons
-// Tracking wheels
-rotation tracking_wheel[2] = {rotation(PORT11, false), rotation(PORT12, false)};
-// IMU
-inertial IMU(PORT13);
+  left_drive_train[FRONT_MOTOR].spin(forward, speed, velocityUnits::pct);
+  // left_drive_train[MIDDLE_MIDDLE].spin(forward, speed, velocityUnits::pct);
+  left_drive_train[BACK_MOTOR].spin(forward, speed, velocityUnits::pct);
+  right_drive_train[FRONT_MOTOR].spin(forward, speed, velocityUnits::pct);
+  // right_drive_train[MIDDLE_MOTOR].spin(forward, speed, velocityUnits::pct);
+  right_drive_train[BACK_MOTOR].spin(forward, speed, velocityUnits::pct);
 
-// Scoring
-motor intake_motor(PORT5);
+  while(left_drive_train[FRONT_MOTOR].position(degrees) + right_drive_train[FRONT_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[MIDDLE_MOTOR].position(degrees) + right_drive_train[MIDDLE_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[BACK_MOTOR].position(degrees) + right_drive_train[BACK_MOTOR].position(degrees) / 2 < target_position)
+  {
+    wait(1, msec);
+  }
 
-// Match loading
-//motor catapult_motor(PORT6); // Uncomment if you have a catapult
-motor flywheel_motor(PORT6); // Uncomment if you have a flywheel
-//motor puncher_motor(PORT6); // Uncomment if you have a puncher / slapper
+  left_drive_train[FRONT_MOTOR].stop(brake);
+  // left_drive_train[MIDDLE_MOTOR].stop(brake);
+  left_drive_train[BACK_MOTOR].stop(brake);
+  right_drive_train[FRONT_MOTOR].stop(brake);
+  // right_drive_train[MIDDLE_MOTOR].stop(brake);
+  right_drive_train[BACK_MOTOR].stop(brake);
+}
+// Move backwards in inches
+void drive_backwards(int dist = 12)
+{
+  const int speed = 1600;
+  const int circumfrance = 5; // Circumfrance in inches
 
-// Controller inputs
-// Joysticks
-int32_t left_joystick[2] = {Controller1.Axis4.position(), Controller1.Axis3.position()};
-int32_t right_joystick[2] = {Controller1.Axis1.position(), Controller1.Axis2.position()};
-// Back buttons
-bool left_trigger[2] = {Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()};
-bool right_trigger[2] = {Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()};
-// Arrow buttons
-bool arrow[4] = {Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(),          \
-                 Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing()};
-// Action buttons
-bool action[4] = {Controller1.ButtonX.pressing(), Controller1.ButtonY.pressing(),      \
-                  Controller1.ButtonA.pressing(), Controller1.ButtonB.pressing()};
+  float target_position = dist * 360 / (2 * PI * circumfrance);
+
+  left_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // left_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  left_drive_train[BACK_MOTOR].setPosition(0, degrees);
+  right_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // right_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  right_drive_train[BACK_MOTOR].setPosition(0, degrees);
+
+  left_drive_train[FRONT_MOTOR].spin(reverse, speed, velocityUnits::pct);
+  // left_drive_train[MIDDLE_MIDDLE].spin(reverse, speed, velocityUnits::pct);
+  left_drive_train[BACK_MOTOR].spin(reverse, speed, velocityUnits::pct);
+  right_drive_train[FRONT_MOTOR].spin(reverse, speed, velocityUnits::pct);
+  // right_drive_train[MIDDLE_MOTOR].spin(reverse, speed, velocityUnits::pct);
+  right_drive_train[BACK_MOTOR].spin(reverse, speed, velocityUnits::pct);
+
+  while(left_drive_train[FRONT_MOTOR].position(degrees) + right_drive_train[FRONT_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[MIDDLE_MOTOR].position(degrees) + right_drive_train[MIDDLE_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[BACK_MOTOR].position(degrees) + right_drive_train[BACK_MOTOR].position(degrees) / 2 < target_position)
+  {
+    wait(1, msec);
+  }
+
+  left_drive_train[FRONT_MOTOR].stop(brake);
+  // left_drive_train[MIDDLE_MOTOR].stop(brake);
+  left_drive_train[BACK_MOTOR].stop(brake);
+  right_drive_train[FRONT_MOTOR].stop(brake);
+  // right_drive_train[MIDDLE_MOTOR].stop(brake);
+  right_drive_train[BACK_MOTOR].stop(brake);
+}
+// Turn left in degrees
+void turn_left(int degs = 90)
+{
+  float target_position =  0 - (degs * 360 / 90);
+
+  left_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // left_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  left_drive_train[BACK_MOTOR].setPosition(0, degrees);
+  right_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // right_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  right_drive_train[BACK_MOTOR].setPosition(0, degrees);
+
+  left_drive_train[FRONT_MOTOR].spin(reverse, degs, velocityUnits::pct);
+  // left_drive_train[MIDDLE_MIDDLE].spin(reverse, speed, velocityUnits::pct);
+  left_drive_train[BACK_MOTOR].spin(reverse, degs, velocityUnits::pct);
+  right_drive_train[FRONT_MOTOR].spin(forward, degs, velocityUnits::pct);
+  // right_drive_train[MIDDLE_MOTOR].spin(forward, speed, velocityUnits::pct);
+  right_drive_train[BACK_MOTOR].spin(forward, degs, velocityUnits::pct);
+
+  while(left_drive_train[FRONT_MOTOR].position(degrees) - right_drive_train[FRONT_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[MIDDLE_MOTOR].position(degrees) - right_drive_train[MIDDLE_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[BACK_MOTOR].position(degrees) - right_drive_train[BACK_MOTOR].position(degrees) / 2 < target_position)
+  {
+    wait(1, msec);
+  }
+
+  left_drive_train[FRONT_MOTOR].stop(brake);
+  // left_drive_train[MIDDLE_MOTOR].stop(brake);
+  left_drive_train[BACK_MOTOR].stop(brake);
+  right_drive_train[FRONT_MOTOR].stop(brake);
+  // right_drive_train[MIDDLE_MOTOR].stop(brake);
+  right_drive_train[BACK_MOTOR].stop(brake);
+}
+// Turn right in degrees
+void turn_right(int degs = 90)
+{
+  float target_position =  degs * 360 / 90;
+
+  left_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // left_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  left_drive_train[BACK_MOTOR].setPosition(0, degrees);
+  right_drive_train[FRONT_MOTOR].setPosition(0, degrees);
+  // right_drive_train[MIDDLE_MOTOR].setPosition(0, degrees);
+  right_drive_train[BACK_MOTOR].setPosition(0, degrees);
+
+  left_drive_train[FRONT_MOTOR].spin(reverse, degs, velocityUnits::pct);
+  // left_drive_train[MIDDLE_MIDDLE].spin(reverse, speed, velocityUnits::pct);
+  left_drive_train[BACK_MOTOR].spin(reverse, degs, velocityUnits::pct);
+  right_drive_train[FRONT_MOTOR].spin(forward, degs, velocityUnits::pct);
+  // right_drive_train[MIDDLE_MOTOR].spin(forward, speed, velocityUnits::pct);
+  right_drive_train[BACK_MOTOR].spin(forward, degs, velocityUnits::pct);
+
+  while(left_drive_train[FRONT_MOTOR].position(degrees) - right_drive_train[FRONT_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[MIDDLE_MOTOR].position(degrees) - right_drive_train[MIDDLE_MOTOR].position(degrees) / 2 < target_position &&\
+        left_drive_train[BACK_MOTOR].position(degrees) - right_drive_train[BACK_MOTOR].position(degrees) / 2 < target_position)
+  {
+    wait(1, msec);
+  }
+
+  left_drive_train[FRONT_MOTOR].stop(brake);
+  // left_drive_train[MIDDLE_MOTOR].stop(brake);
+  left_drive_train[BACK_MOTOR].stop(brake);
+  right_drive_train[FRONT_MOTOR].stop(brake);
+  // right_drive_train[MIDDLE_MOTOR].stop(brake);
+  right_drive_train[BACK_MOTOR].stop(brake);
+}
 
 // Prints inspirational messages to the brain + controller
 void print_msg(void)
 {
   Brain.Screen.setCursor(6, 5);
-  Brain.Screen.setPenColor(blue);
+  Brain.Screen.setPenColor(cyan);
   Brain.Screen.print("Powered by Blåhaj.lib  :)");
+
+  while(true)
+  {
+    Brain.Screen.setPenColor(yellow);
+    Brain.Screen.setCursor(1, 1);
+    Brain.Screen.print("Battery: %d", Brain.Battery.capacity(), "%");
+    Brain.Screen.setCursor(1, 2);
+    Brain.Screen.print("Voltage: %f", Brain.Battery.voltage(), "V");
+    Brain.Screen.setCursor(1, 3);
+    Brain.Screen.print("Current: %f", Brain.Battery.current(), "A");
+
+    wait(1, seconds);
+  }
 }
 
 void pre_auton(void)
@@ -171,6 +321,10 @@ void auton(void)
   if(AUTON)
   {
     // Auton code
+    // - go to the front of the goal
+    // - score alliance triball
+    // - get ball from behind bot
+    // - score triball
   }
 }
 
@@ -182,29 +336,44 @@ void user_controls(void)
   {
     // Drive train controls
     left_drive_train[FRONT_MOTOR].spin(forward, left_joystick[Y], velocityUnits::pct);
+    // left_drive_train[MIDDLE_MIDDLE].spin(forward, left_joystick[Y], velocityUnits::pct);
     left_drive_train[BACK_MOTOR].spin(forward, left_joystick[Y], velocityUnits::pct);
     right_drive_train[FRONT_MOTOR].spin(forward, right_joystick[Y], velocityUnits::pct);
+    // right_drive_train[MIDDLE_MOTOR].spin(forward, left_joystick[Y], velocityUnits::pct);
     right_drive_train[BACK_MOTOR].spin(forward, right_joystick[Y], velocityUnits::pct);
 
     // Intake controls
     if(right_trigger[L1])
     {
-      intake_motor.spin(forward, 1200, velocityUnits::pct);
+      intake_motor.spin(reverse, 1200, velocityUnits::pct);
     } else if(right_trigger[L2])
     {
-      intake_motor.spin(forward, -1200, velocityUnits::pct);
+      intake_motor.spin(forward, 1200, velocityUnits::pct);
     } else
     {
-      intake_motor.spin(forward, 0, velocityUnits::pct);
+      intake_motor.stop(brake);
     }
 
     // Flywheel controls
+    int flywheel_speed = 0;
+
     if(left_trigger[L1])
     {
-      flywheel_motor.spin(forward, 1800, velocityUnits::pct);
-    } else
+      flywheel_speed = 1800;
+    } else if(left_trigger[L2])
     {
-      flywheel_motor.spin(forward, 0, velocityUnits::pct);
+      flywheel_speed = 0;
+      flywheel_motor.stop();
+    }
+
+    flywheel_motor.spin(forward, flywheel_speed, velocityUnits::pct);
+
+    // Piston controls
+    bool piston_state = false;
+
+    if(arrow[UP])
+    {
+      solenoid[a].set(!piston_state);
     }
 
     wait(1, msec);
@@ -215,12 +384,14 @@ int main() {
   Brain.Screen.clearScreen();
 
   // Reseting motors
-  left_drive_train[FRONT_MOTOR].spin(forward, 0, velocityUnits::pct);
-  left_drive_train[BACK_MOTOR].spin(forward, 0, velocityUnits::pct);
-  right_drive_train[FRONT_MOTOR].spin(forward, 0, velocityUnits::pct);
-  right_drive_train[BACK_MOTOR].spin(forward, 0, velocityUnits::pct);
-  intake_motor.spin(forward, 0, velocityUnits::pct);
-  flywheel_motor.spin(forward, 0, velocityUnits::pct);
+  left_drive_train[FRONT_MOTOR].stop(brake);
+  // left_drive_train[MIDDLE_MOTOR].stop(brake);
+  left_drive_train[BACK_MOTOR].stop(brake);
+  right_drive_train[FRONT_MOTOR].stop(brake);
+  // right_drive_train[MIDDLE_MOTOR].stop(brake);
+  right_drive_train[BACK_MOTOR].stop(brake);
+  intake_motor.stop(brake);
+  flywheel_motor.stop(brake);
 
   Competition.autonomous(auton);
   Competition.drivercontrol(user_controls);
@@ -231,4 +402,6 @@ int main() {
   {
     wait(1, msec);
   }
+
+  return 0;
 }

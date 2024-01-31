@@ -66,10 +66,10 @@ using namespace vex;
 #define Y 1 // Used for: left_joystick + right_joystick + action_button
 #define A 2 // Used for: action_button
 #define B 3 // Used for: action_button
-#define L1 0 // Used for: back_left
-#define L2 1 // Used for: back_left
-#define R1 0 // Used for: back_right
-#define R2 1 // Used for: back_right
+#define L1 0 // Used for: left_trigger
+#define L2 1 // Used for: left_trigger
+#define R1 0 // Used for: right_trigger
+#define R2 1 // Used for: right_trigger
 #define UP 0 // Used for: arrow
 #define DOWN 1 // Used for: arrow
 #define LEFT 2 // Used for: arrow
@@ -134,8 +134,8 @@ motor flywheel_motor(PORT6); // Uncomment if you have a flywheel
 double left_joystick[2] = [Controller1.Axis4.position(), Controller1.Axis3.position()];
 double right_joystick[2] = [Controller1.Axis1.position(), Controller1.Axis2.position()];
 // Back buttons
-bool back_left[2] = [Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()];
-bool back_right[2] = [Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()];
+bool left_trigger[2] = [Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()];
+bool right_trigger[2] = [Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()];
 // Arrow buttons
 bool arrow[4] = [Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(),          \
                  Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing()];
@@ -174,10 +174,10 @@ void user_controls(void)
     right_drive_train[BACK_MOTOR].spin(forward, right_joystick[Y], velocityUnits::pct);
 
     // Intake controls
-    if(back_right[L1])
+    if(right_trigger[L1])
     {
       intake_motor.spin(forward, 1200, velocityUnits::pct);
-    } else if(back_right[L2])
+    } else if(right_trigger[L2])
     {
       intake_motor.spin(forward, -1200, velocityUnits::pct);
     } else
@@ -186,10 +186,10 @@ void user_controls(void)
     }
 
     // Flywheel controls
-    if(back_left[L1])
+    if(left_trigger[L1])
     {
       flywheel_motor.spin(forward, 1800, velocityUnits::pct);
-    } else if(back_left[L2])
+    } else if(left_trigger[L2])
     {
       flywheel_motor.spin(forward, 0, velocityUnits::pct);
     } else

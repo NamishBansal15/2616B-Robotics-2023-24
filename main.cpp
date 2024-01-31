@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
 
 
 #include "vex.h"
@@ -42,7 +43,7 @@ void playVexcodeSound(const char *soundName) {
 
 #pragma endregion VEXcode Generated Robot Configuration
 
-// ~~~ All code below this line (45+) was written by me ~~~
+// ~~~ All code below this line (46+) was written by me ~~~
 /*
 +--------------------------------------------------------------------------+
 |                                                                          |
@@ -89,6 +90,10 @@ using namespace vex;
 #define MIDDLE_MOTOR 1 // Used for: left_drive_train + right_drive_train
 #define BACK_MOTOR 2 // Used for: left_drive_train + right_drive_train
 
+// Define tracking wheels
+#define UP_DOWN 0 // Used for: tracking_wheel
+#define LEFT_RIGHT 1 // Used for: tracking_wheel
+
 // Define if you have an auton
 #define AUTON false
 
@@ -109,6 +114,12 @@ motor right_drive_train[3] = [motor(PORT4),                                     
 // Pneumatics
 digital_out solenoid[8] = [Brain.ThreeWirePort.A, Brain.ThreeWirePort.B, Brain.ThreeWirePort.C, Brain.ThreeWirePort.D,\
                            Brain.ThreeWirePort.E, Brain.ThreeWirePort.F, Brain.ThreeWirePort.G, Brain.ThreeWirePort.H];
+
+// Autons
+// Tracking wheels
+rotation tracking_wheel[2] = [rotation(PORT11, false), rotation(PORT12, false)];
+// IMU
+inertial IMU(PORT13);
 
 // Scoring
 motor intake_motor(PORT5);

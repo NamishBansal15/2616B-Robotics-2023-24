@@ -61,6 +61,8 @@ void playVexcodeSound(const char *soundName) {
 // Allows for easier use of the VEX Library
 using namespace vex;
 
+using namespace std;
+
 // Define (preset) controller layout
 #define X 0 // Used for: left_joystick + right_joystick + action_button
 #define Y 1 // Used for: left_joystick + right_joystick + action_button
@@ -77,13 +79,13 @@ using namespace vex;
 
 // Define analog ports
 #define a 0 // Used for: solenoid
-#define b 0 // Used for: solenoid
-#define c 0 // Used for: solenoid
-#define d 0 // Used for: solenoid
-#define e 0 // Used for: solenoid
-#define f 0 // Used for: solenoid
-#define g 0 // Used for: solenoid
-#define h 0 // Used for: solenoid
+#define b 1 // Used for: solenoid
+#define c 2 // Used for: solenoid
+#define d 3 // Used for: solenoid
+#define e 4 // Used for: solenoid
+#define f 5 // Used for: solenoid
+#define g 6 // Used for: solenoid
+#define h 7 // Used for: solenoid
 
 // Define drive train motor types
 #define FRONT_MOTOR 0 // Used for: left_drive_train + right_drive_train
@@ -111,12 +113,11 @@ motor left_drive_train[3] = {motor(PORT2, true),                                
 motor right_drive_train[3] = {motor(PORT4),                                                                                          \
                               0 /* put 0 if there is no middle drive motor or motor(PORT#) if there is */, motor(PORT3)};
 // Putting true after the port reverses the motor
-// *** Do not put false after the port, that will freeze the motor ***
 // Pneumatics
-digital_out solenoid = {digital_out(Brain.ThreeWirePort.A), digital_out(Brain.ThreeWirePort.B),       \
-                        digital_out(Brain.ThreeWirePort.C), digital_out(Brain.ThreeWirePort.D),       \
-                        digital_out(Brain.ThreeWirePort.E), digital_out(Brain.ThreeWirePort.F),       \
-                        digital_out(Brain.ThreeWirePort.G), digital_out(Brain.ThreeWirePort.H)};
+digital_out solenoid[8] = {digital_out(Brain.ThreeWirePort.A), digital_out(Brain.ThreeWirePort.B),       \
+                           digital_out(Brain.ThreeWirePort.C), digital_out(Brain.ThreeWirePort.D),       \
+                           digital_out(Brain.ThreeWirePort.E), digital_out(Brain.ThreeWirePort.F),       \
+                           digital_out(Brain.ThreeWirePort.G), digital_out(Brain.ThreeWirePort.H)};
 
 // Autons
 // Tracking wheels
@@ -201,9 +202,6 @@ void user_controls(void)
     if(left_trigger[L1])
     {
       flywheel_motor.spin(forward, 1800, velocityUnits::pct);
-    } else if(left_trigger[L2])
-    {
-      flywheel_motor.spin(forward, 0, velocityUnits::pct);
     } else
     {
       flywheel_motor.spin(forward, 0, velocityUnits::pct);

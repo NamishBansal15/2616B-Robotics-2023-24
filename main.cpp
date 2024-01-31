@@ -1,11 +1,12 @@
-// ~~~ Do not touch anything in the #pragma section ~~~
+/*
+~~~ DO NOT touch anything from '#pragma region VEXcode Generated Robot Configuration' to '#pragma endregion VEXcode Generated Robot Configuration' ~~~
+*/
 #pragma region VEXcode Generated Robot Configuration
 // Make sure all required headers are included.
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include <string.h>
 
 
 #include "vex.h"
@@ -41,7 +42,7 @@ void playVexcodeSound(const char *soundName) {
 
 #pragma endregion VEXcode Generated Robot Configuration
 
-// ~~~ All code below this line was written by me ~~~
+// ~~~ All code below this line (43+) was written by me ~~~
 /*
 +--------------------------------------------------------------------------+
 |                                                                          |
@@ -59,34 +60,55 @@ void playVexcodeSound(const char *soundName) {
 // Allows for easier use of the VEX Library
 using namespace vex;
 
-// Define motor types
-#define FRONT_MOTOR 0 // for: left_drive_train + right_drive_train
-#define MIDDLE_MOTOR 1 // for: left_drive_train + right_drive_train
-#define BACK_MOTOR 2 // for: left_drive_train + right_drive_train
+// Define (preset) brain button layout
+#define X 0 // Used for: left_joystick + right_joystick + action_button
+#define Y 1 // Used for: left_joystick + right_joystick + action_button
+#define A 2 // Used for: action_button
+#define B 3 // Used for: action_button
+#define L1 0 // Used for: back_left
+#define L2 1 // Used for: back_left
+#define R1 0 // Used for: back_right
+#define R2 1 // Used for: back_right
+#define UP 0 // Used for: arrow
+#define DOWN 1 // Used for: arrow
+#define LEFT 2 // Used for: arrow
+#define RIGHT 3 // Used for: arrow
 
-// Define button layout
-#define X 0 // for: left_joystick + right_joystick + action_button
-#define Y 1 // for: left_joystick + right_joystick + action_button
-#define A 2 // for: action_button
-#define B 3 // for: action_button
-#define L1 0 // for: back_left
-#define L2 1 // for: back_left
-#define R1 0 // for: back_right
-#define R2 1 // for: back_right
-#define UP 0 // for: arrow
-#define DOWN 1 // for: arrow
-#define LEFT 2 // for: arrow
-#define RIGHT 3 // for: arrow
+// Define analog ports
+#define a 0 // Used for: solenoid
+#define b 0 // Used for: solenoid
+#define c 0 // Used for: solenoid
+#define d 0 // Used for: solenoid
+#define e 0 // Used for: solenoid
+#define f 0 // Used for: solenoid
+#define g 0 // Used for: solenoid
+#define h 0 // Used for: solenoid
+
+// Define drive train motor types
+#define FRONT_MOTOR 0 // Used for: left_drive_train + right_drive_train
+#define MIDDLE_MOTOR 1 // Used for: left_drive_train + right_drive_train
+#define BACK_MOTOR 2 // Used for: left_drive_train + right_drive_train
+
+// Define if you have an auton
+#define AUTON false
 
 // Controller
 controller Controller1(primary);
 
+// Competition
+competition Competition;
+
 // Drive train
-motor left_drive_train[3] = [motor(PORT2, true), null /* put null if there is no middle drive motor or motor(PORT#, true) */, motor(PORT1, true)];
-motor right_drive_train[3] = [motor(PORT4), null /* put null if there is no middle drive motor or motor(PORT#) */, motor(PORT3)];
+motor left_drive_train[3] = [motor(PORT2, true),                                                                                                \
+                             null /* put null if there is no middle drive motor or motor(PORT#, true) if there is */, motor(PORT1, true)];
+motor right_drive_train[3] = [motor(PORT4),                                                                                          \
+                              null /* put null if there is no middle drive motor or motor(PORT#) if there is */, motor(PORT3)];
 // Putting true after the port reverses the motor
 // *** Do not put false after the port, that will freeze the motor ***
 
+// Pneumatics
+digital_out solenoid[8] = [Brain.ThreeWirePort.A, Brain.ThreeWirePort.B, Brain.ThreeWirePort.C, Brain.ThreeWirePort.D,\
+                           Brain.ThreeWirePort.E, Brain.ThreeWirePort.F, Brain.ThreeWirePort.G, Brain.ThreeWirePort.H];
 
 // Scoring
 motor intake_motor(PORT5);
@@ -104,12 +126,11 @@ double right_joystick[2] = [Controller1.Axis1.position(), Controller1.Axis2.posi
 bool back_left[2] = [Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()];
 bool back_right[2] = [Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()];
 // Arrow buttons
-bool arrow[4] = [Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(), Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing()];
+bool arrow[4] = [Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(),          \
+                 Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing()];
 // Action buttons
-bool action[4] = [Controller1.ButtonX.pressing(), Controller1.ButtonY.pressing(), Controller1.ButtonA.pressing(), Controller1.ButtonB.pressing()]
-
-// Pneumatics
-digital_out pneumatics(Brain.ThreeWirePort.A);
+bool action[4] = [Controller1.ButtonX.pressing(), Controller1.ButtonY.pressing(),      \
+                  Controller1.ButtonA.pressing(), Controller1.ButtonB.pressing()];
 
 void pre_auton(void)
 {
@@ -123,46 +144,15 @@ void auton(void)
 {
   Brain.Screen.clearScreen();
 
-  // auton
+  if(AUTON)
+  {
+    // Auton code
+  }
 }
 
 void user_controls(void)
 {
   Brain.Screen.clearScreen();
-
-  while(true)
-  {
-    wait(1, msec);
-  }
-}
-
-// Prints inspirational messages
-void print_msg()
-{
-  Brain.Screen.setCursor(6, 5);
-  Brain.Screen.setPenColor(green);
-  Brain.Screen.print("Powered by Blåhaj.lib  :)");
-  Controller1.Screen.setPenColor(black);
-  Controller1.Screen.print("Lock in Fred :)");
-}
-
-int main() {
-  Brain.Screen.clearScreen();
-
-  // Reset motors
-  left_drive_train[FRONT_MOTOR].spin(forward, 0, velocityUnits::pct);
-  left_drive_train[BACK_MOTOR].spin(forward, 0, velocityUnits::pct);
-  right_drive_train[FRONT_MOTOR].spin(forward, 0, velocityUnits::pct);
-  right_drive_train[BACK_MOTOR].spin(forward, 0, velocityUnits::pct);
-  intake_motor.spin(forward, 0, velocityUnits::pct);
-  flywheel_motor.spin(forward, 0, velocityUnits::pct);
-
-  competition Competition;
-
-  Competition.autonomous(auton);
-  Competition.drivercontrol(user_controls);
-
-  pre_auton();
 
   while(true)
   {
@@ -196,6 +186,39 @@ int main() {
       flywheel_motor.spin(forward, 0, velocityUnits::pct);
     }
 
+    wait(1, msec);
+  }
+}
+
+// Prints inspirational messages to the brain + controller
+void print_msg(void)
+{
+  Brain.Screen.setCursor(6, 5);
+  Brain.Screen.setPenColor(blue);
+  Brain.Screen.print("Powered by Blåhaj.lib  :)");
+
+  Controller1.Screen.setPenColor(black);
+  Controller1.Screen.print("Lock in Fred :)");
+}
+
+int main() {
+  Brain.Screen.clearScreen();
+
+  // Reseting motors
+  left_drive_train[FRONT_MOTOR].spin(forward, 0, velocityUnits::pct);
+  left_drive_train[BACK_MOTOR].spin(forward, 0, velocityUnits::pct);
+  right_drive_train[FRONT_MOTOR].spin(forward, 0, velocityUnits::pct);
+  right_drive_train[BACK_MOTOR].spin(forward, 0, velocityUnits::pct);
+  intake_motor.spin(forward, 0, velocityUnits::pct);
+  flywheel_motor.spin(forward, 0, velocityUnits::pct);
+
+  Competition.autonomous(auton);
+  Competition.drivercontrol(user_controls);
+
+  pre_auton();
+
+  while(true)
+  {
     wait(1, msec);
   }
 }

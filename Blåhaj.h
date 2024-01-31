@@ -104,21 +104,23 @@ controller Controller1(primary);
 // Competition
 competition Competition;
 
+// Bot parts
 // Drive train
-motor left_drive_train[3] = [motor(PORT2, true),                                                                                                \
-                             null /* put null if there is no middle drive motor or motor(PORT#, true) if there is */, motor(PORT1, true)];
-motor right_drive_train[3] = [motor(PORT4),                                                                                          \
-                              null /* put null if there is no middle drive motor or motor(PORT#) if there is */, motor(PORT3)];
+motor left_drive_train[3] = {motor(PORT2, true),                                                                                                \
+                             0 /* put 0 if there is no middle drive motor or motor(PORT#, true) if there is */, motor(PORT1, true)};
+motor right_drive_train[3] = {motor(PORT4),                                                                                          \
+                              0 /* put 0 if there is no middle drive motor or motor(PORT#) if there is */, motor(PORT3)};
 // Putting true after the port reverses the motor
 // *** Do not put false after the port, that will freeze the motor ***
-
 // Pneumatics
-digital_out solenoid[8] = [Brain.ThreeWirePort.A, Brain.ThreeWirePort.B, Brain.ThreeWirePort.C, Brain.ThreeWirePort.D,\
-                           Brain.ThreeWirePort.E, Brain.ThreeWirePort.F, Brain.ThreeWirePort.G, Brain.ThreeWirePort.H];
+digital_out solenoid = {digital_out(Brain.ThreeWirePort.A), digital_out(Brain.ThreeWirePort.B),       \
+                        digital_out(Brain.ThreeWirePort.C), digital_out(Brain.ThreeWirePort.D),       \
+                        digital_out(Brain.ThreeWirePort.E), digital_out(Brain.ThreeWirePort.F),       \
+                        digital_out(Brain.ThreeWirePort.G), digital_out(Brain.ThreeWirePort.H)};
 
 // Autons
 // Tracking wheels
-rotation tracking_wheel[2] = [rotation(PORT11, false), rotation(PORT12, false)];
+rotation tracking_wheel[2] = {rotation(PORT11, false), rotation(PORT12, false)};
 // IMU
 inertial IMU(PORT13);
 
@@ -132,17 +134,25 @@ motor flywheel_motor(PORT6); // Uncomment if you have a flywheel
 
 // Controller inputs
 // Joysticks
-float left_joystick[2] = [Controller1.Axis4.position(), Controller1.Axis3.position()];
-float right_joystick[2] = [Controller1.Axis1.position(), Controller1.Axis2.position()];
+int32_t left_joystick[2] = {Controller1.Axis4.position(), Controller1.Axis3.position()};
+int32_t right_joystick[2] = {Controller1.Axis1.position(), Controller1.Axis2.position()};
 // Back buttons
-bool left_trigger[2] = [Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()];
-bool right_trigger[2] = [Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()];
+bool left_trigger[2] = {Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()};
+bool right_trigger[2] = {Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()};
 // Arrow buttons
-bool arrow[4] = [Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(),          \
-                 Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing()];
+bool arrow[4] = {Controller1.ButtonUp.pressing(), Controller1.ButtonDown.pressing(),          \
+                 Controller1.ButtonLeft.pressing(), Controller1.ButtonRight.pressing()};
 // Action buttons
-bool action[4] = [Controller1.ButtonX.pressing(), Controller1.ButtonY.pressing(),      \
-                  Controller1.ButtonA.pressing(), Controller1.ButtonB.pressing()];
+bool action[4] = {Controller1.ButtonX.pressing(), Controller1.ButtonY.pressing(),      \
+                  Controller1.ButtonA.pressing(), Controller1.ButtonB.pressing()};
+
+// Prints inspirational messages to the brain + controller
+void print_msg(void)
+{
+  Brain.Screen.setCursor(6, 5);
+  Brain.Screen.setPenColor(blue);
+  Brain.Screen.print("Powered by Blåhaj.lib  :)");
+}
 
 void pre_auton(void)
 {
@@ -201,17 +211,6 @@ void user_controls(void)
 
     wait(1, msec);
   }
-}
-
-// Prints inspirational messages to the brain + controller
-void print_msg(void)
-{
-  Brain.Screen.setCursor(6, 5);
-  Brain.Screen.setPenColor(blue);
-  Brain.Screen.print("Powered by Blåhaj.lib  :)");
-
-  Controller1.Screen.setPenColor(black);
-  Controller1.Screen.print("Lock in Fred :)");
 }
 
 int main() {

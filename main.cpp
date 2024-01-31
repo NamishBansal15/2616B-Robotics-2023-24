@@ -50,7 +50,7 @@ void playVexcodeSound(const char *soundName) {
 |   Module:       Blåhaj.lib                                               |
 |   Author:       Rohan Bharatia                                           |
 |   Created:      1/30/2024                                                |
-|   Description:  V5 project                                               |
+|   Description:  Code for VRC Over Under 2616B 2023-2024                  |
 |                                                                          |
 +--------------------------------------------------------------------------+
 */
@@ -61,7 +61,7 @@ void playVexcodeSound(const char *soundName) {
 // Allows for easier use of the VEX Library
 using namespace vex;
 
-// Define (preset) brain button layout
+// Define (preset) controller layout
 #define X 0 // Used for: left_joystick + right_joystick + action_button
 #define Y 1 // Used for: left_joystick + right_joystick + action_button
 #define A 2 // Used for: action_button
@@ -99,6 +99,7 @@ using namespace vex;
 
 // Controller
 controller Controller1(primary);
+// controller Controller2(partner); // Only use a partner controller if you NEED it (not likely)
 
 // Competition
 competition Competition;
@@ -131,8 +132,8 @@ motor flywheel_motor(PORT6); // Uncomment if you have a flywheel
 
 // Controller inputs
 // Joysticks
-double left_joystick[2] = [Controller1.Axis4.position(), Controller1.Axis3.position()];
-double right_joystick[2] = [Controller1.Axis1.position(), Controller1.Axis2.position()];
+float left_joystick[2] = [Controller1.Axis4.position(), Controller1.Axis3.position()];
+float right_joystick[2] = [Controller1.Axis1.position(), Controller1.Axis2.position()];
 // Back buttons
 bool left_trigger[2] = [Controller1.ButtonL1.pressing(), Controller1.ButtonL2.pressing()];
 bool right_trigger[2] = [Controller1.ButtonR1.pressing(), Controller1.ButtonR2.pressing()];
@@ -151,6 +152,7 @@ void pre_auton(void)
   
   wait(1, seconds);
 }
+
 void auton(void)
 {
   Brain.Screen.clearScreen();

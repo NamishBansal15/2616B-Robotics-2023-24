@@ -30,28 +30,25 @@ brain Brain;
 // Controller
 controller Controller1 = controller(primary);
 
-// Drive train
-// Left drive motors
-motor left_front = motor(PORT1, ratio6_1, false);
-motor left_back = motor(PORT2, ratio6_1, false);
+// Drivetrain
+motor left_front = motor(PORT1, ratio6_1, true);
+motor left_back = motor(PORT2, ratio6_1, true);
 motor_group left_drive = motor_group(left_front, left_back);
-// Right drive motors
-motor right_front = motor(PORT3, ratio6_1, true);
-motor right_back = motor(PORT4, ratio6_1, true);
+motor right_front = motor(PORT3, ratio6_1, false);
+motor right_back = motor(PORT4, ratio6_1, false);
 motor_group right_drive = motor_group(right_front, right_back);
-// IMU
 inertial drive_IMU = inertial(PORT7);
-// Putting it all together
-smartdrive drive_train = smartdrive(left_drive, right_drive, drive_IMU, 398.98, 320, 40, mm, 0.5714285714285714);
+smartdrive drive_train = smartdrive(left_drive, right_drive, drive_IMU, 319.19, 320, 40, mm, 0.42857142857142855);
 
-// Intake motor
-motor intake = motor(PORT5, ratio6_1, false);
+// Intake
+motor intake_motor = motor(PORT5, ratio6_1, false);
 
-// Flywheel motor
-motor flywheel = motor(PORT6, ratio6_1, false);
+// Flywheel
+motor flywheel_motor = motor(PORT6, ratio6_1, false);
 
-// Piston solenoid
-digital_out solenoid = digital_out(Brain.ThreeWirePort.A);
+// Wings (pistons)
+motor solenoid = digital_out(Brain.ThreeWirePort.A);
+
 
 void calibrateDrivetrain() {
   wait(200, msec);
@@ -83,14 +80,14 @@ bool RemoteControlCodeEnabled = true;
 #pragma endregion VEXcode Generated Robot Configuration
 
 /*
-  +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
-  |                                                                                |
-  |    Module:       main.cpp                                                      |
-  |    Author:       Rohan Bharatia                                                |
-  |    Created:      1/31/2024                                                     |
-  |    Description:  2023-2024 2616B Blåhaj Code                                   |
-  |                                                                                |
-  +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+  +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+  |                                                         |
+  |    Module:       2616B.v5cpp                            |
+  |    Author:       Rohan Bharatia                         |
+  |    Created:      2/1/2024                               |
+  |    Description:  2023-2024 2616B Blahaj vexcode file    |
+  |                                                         |
+  +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
 */
 
 // Include the V5 Library
@@ -99,96 +96,184 @@ bool RemoteControlCodeEnabled = true;
 // Allows for easier use of the VEX Library
 using namespace vex;
 
-// Define if you have an auton
-bool AUTON = false;
+float f_mm(float feet)
+{
+  return (feet * 3.2808) * 1000;
+}
 
 void pre_auton(void)
 {
-  Brain.Screen.clearScreen();
-
-  wait(1, seconds);
+  wait(10, seconds);
 }
 
 void auton(void)
 {
   Brain.Screen.clearScreen();
 
-  if(AUTON)
+  // Auton
+  drive_train.driveFor(forward, f_mm(5.5), mm);
+  drive_train.turnFor(left, 90 degrees);
+  drive_train.driveFor(forward, f_mm(0.5), mm);
+  intake_motor.spinFor(reverse, 360 * 5, degrees);
+  drive_train.driveFor(reverse, f_mm(0.5), mm);
+  drive_train.turnFor(left, 180, degrees);
+  drive_train.driveFor(forward, f_mm(1), mm);
+  int i = 1;
+  while(i === 1)
   {
-    // Auton cose
+    intake_motor.spinFor(forward, 360 * 4, degrees);
   }
+  drive_train.turnFor(left, 180, degrees);
+  drive_train.driveFor(forward, f_mm(2), mm);
+  i = 0;
+  intake_motor.spinFor(reverse, 360 * 5, degrees);
 }
 
-void user_controls(void)
+void driver_controls(void)
 {
   Brain.Screen.clearScreen();
 
+  drive_train.setStopping(brake);
+  intake_motor.setStopping(brake);
+  flywheel_motor.setStopping(brake);
+
+  bool left_move = true;
+  bool right_move = true;
+
+  bool intake = true;
+  bool outtake = false;
+
+  bool flywheel = true;
+
+  bool wings = true;
+
   while(true)
   {
-    // Drive train movement
-    while(Controller1.Axis3.position() > 0 && Controller1.Axis2.position() > 0)
+    if(RemoteControlCodeEnabled)
     {
-      drive_train.drive(forward);
-    }
-    while(Controller1.Axis3.position() < 0 && Controller1.Axis2.position() < 0)
-    {
-      drive_train.drive(reverse);
-    }
+      // Drivetrain controls
+      float left_drive_speed = Controller1.Axis3.position();
+      float right_drive_speed = Controller1.Axis2.position();
 
-    // Drive train rotatation
-    while(Controller1.Axis3.position() < 0 && Controller1.Axis2.position() > 0)
-    {
-      drive_train.turn(left);
-    }
-    while(Controller1.Axis3.position() > 0 && Controller1.Axis2.position() < 0)
-    {
-      drive_train.turn(right);
-    }
+      if(left_drive_speed < 5 && left_drive_speed > -5)
+      {
+        if(left_move)
+        {
+          left_drive.stop();
+          left_move = false;
+        }
+      } else
+      {
+        left_move = true;
+      }
+      if(right_drive_speed < 5 && right_drive_speed > -5)
+      {
+        if(right_move)
+        {
+          right_drive.stop();
+          right_move = false;
+        }
+      } else
+      {
+        right_move = true;
+      }
 
-    // Intake rotation
-    while(Controller1.ButtonR2.pressing())
-    {
-      intake.spin(forward);
+      if(left_move)
+      {
+        left_drive.setVelocity(left_drive_speed * 2, percent);
+        left_drive.spin(forward, 11, volt);
+      }
+      if(right_move)
+      {
+        right_drive.setVelocity(right_drive_speed * 2, percent);
+        right_drive.spin(forward, 11, volt);
+      }
+
+      // Intake controls
+      bool in_ = Controller1.ButtonL1.pressing();
+      bool out_ = Controller1.ButtonL2.pressing();
+
+      if(in_)
+      {
+        if(intake)
+        {
+          intake_motor.stop();
+          intake = false;
+        }
+      } else
+      {
+        intake = true;
+      }
+      if(out_)
+      {
+        if(outtake)
+        {
+          intake_motor.stop();
+          outtake = false;
+        }
+      } else
+      {
+        outtake = true;
+      }
+
+      if(intake)
+      {
+        intake_motor.setVelocity(200, percent);
+        intake_motor.spin(forward, 11, volt);
+      }
+      if(outtake)
+      {
+        intake_motor.setVelocity(200, percent);
+        intake_motor.spin(reverse, 11, volt);
+      }
+
+      // Flywheel controls
+      bool flywheel_on = Controller1.ButtonL1.pressing();
+      bool flywheel_off = Controller1.ButtonL2.pressing();
+
+      if(flywheel_on)
+      {
+        if(flywheel)
+        {
+          flywheel_motor.stop();
+          flywheel = false;
+        }
+      } else
+      {
+        flywheel = true;
+      }
+      if(flywheel_off)
+      {
+        flywheel_motor.stop();
+        flywheel = false;
+      }
+
+      if(flywheel)
+      {
+        flywheel_motor.setVelocity(200, percent);
+        flywheel_motor.spin(forward, 11, volt);
+      }
+
+      // Wings (pistons) controls
+      bool pistons = Controller1.ButtonUp.pressing();
+
+      if(pistons)
+      {
+        if(wings)
+        {
+          solenoid.set(false);
+          wings = false;
+        }
+      } else
+      {
+        wings = true;
+      }
+
+      if(pistons)
+      {
+        solenoid.set(true);
+      }
     }
-    while(Controller1.ButtonR1.pressing())
-    {
-      intake.spin(reverse);
-    }
-
-    // Flywheel rotation
-    bool flywheel_state = false;
-
-    if(Controller1.ButtonL2.pressing())
-    {
-      flywheel_state = true;
-    }
-    if(Controller1.ButtonL1.pressing())
-    {
-      flywheel_state = false;
-    }
-
-    if(flywheel_state)
-    {
-      flywheel.spin(forward);
-    }
-
-    // Wing extenders
-    bool piston_state = false;
-
-    if(Controller1.ButtonUp.pressing())
-    {
-      piston_state = true;
-    } else
-    {
-      piston_state = false;
-    }
-
-    solenoid.set(piston_state);
-
-    // Hard-stopping all motors
-    drive_train.setStopping(brake);
-    intake.setStopping(brake);
-    flywheel.setStopping(brake);
 
     wait(20, msec);
   }
@@ -196,17 +281,20 @@ void user_controls(void)
 
 int main() {
   competition Competition;
-
   calibrateDrivetrain();
 
   Competition.autonomous(auton);
-  Competition.drivercontrol(user_controls);
+  Competition.drivercontrol(driver_controls);
 
   pre_auton();
 
   while(true)
   {
-    wait(100, msec);
+    Brain.Screen.clearScreen();
+
+    Brain.Screen.setCursor(1, 1);
+    Controller1.Screen.print(Brain.Battery.voltage());
+
+    wait(10, msec);
   }
 }
-
